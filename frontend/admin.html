@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Covoiturage CESI</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0f0f1a; color:#e2e8f0; font-family:'Segoe UI',sans-serif; padding:30px 20px; }
+    h1 { color:#a5b4fc; margin-bottom:24px; font-size:20px; }
+    .stats { display:flex; gap:16px; margin-bottom:28px; flex-wrap:wrap; }
+    .stat { background:#1a1a2e; border:1px solid rgba(99,102,241,0.2); border-radius:10px; padding:16px 24px; }
+    .stat span { display:block; font-size:28px; font-weight:700; color:#6366f1; }
+    .stat p { font-size:12px; color:#64748b; margin-top:4px; }
+    table { width:100%; border-collapse:collapse; background:#1a1a2e; border-radius:12px; overflow:hidden; }
+    th { background:#16213e; padding:12px 16px; text-align:left; font-size:12px; color:#64748b; text-transform:uppercase; }
+    td { padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; }
+    tr:hover td { background:rgba(99,102,241,0.05); }
+    .badge { display:inline-block; padding:3px 8px; border-radius:4px; font-size:11px; }
+    .badge.active { background:rgba(16,185,129,0.2); color:#10b981; }
+    .badge.expired { background:rgba(239,68,68,0.2); color:#ef4444; }
+    .btn-del { background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px; }
+    .btn-del:hover { background:rgba(239,68,68,0.3); }
+    .search { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#e2e8f0; padding:10px 14px; border-radius:8px; font-size:14px; width:100%; max-width:320px; margin-bottom:20px; outline:none; }
+    @media(max-width:600px) { td:nth-child(3), th:nth-child(3) { display:none; } }
+  </style>
+</head>
+<body>
+  <h1>🛡️ Administration — Covoiturage CESI</h1>
+  <div class="stats">
+    <div class="stat"><span id="count-total">—</span><p>Trajets total</p></div>
+    <div class="stat"><span id="count-active">—</span><p>Trajets actifs</p></div>
+    <div class="stat"><span id="count-expired">—</span><p>Trajets expirés</p></div>
+  </div>
+  <input class="search" type="text" id="search" placeholder="Rechercher un nom, email..."/>
+  <table>
+    <thead>
+      <tr>
+        <th>Personne</th>
+        <th>Départ</th>
+        <th>Email</th>
+        <th>Expiration</th>
+        <th>Statut</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <script>
+    const creds = btoa('numerilab:numerilab');
+    let allTrajets = [];
+
+    async function load() {
+      const res = await fetch('/api/admin/trajets', {
+        headers: { 'Authorization': 'Basic ' + creds }
+      });
+      if (res.status === 401) { alert('Accès refusé'); return; }
+      allTrajets = await res.json();
+      const now = new Date();
+      document.getElementById('count-total').textContent = allTrajets.length;
+      document.getElementById('count-active').textContent = allTrajets.filter(t => !t.expire_at || new Date(t.expire_at) > now).length;
+      document.getElementById('count-expired').textContent = allTrajets.filter(t => t.expire_at && new Date(t.expire_at) <= now).length;
+      render(allTrajets);
+    }
+
+    function render(trajets) {
+      const now = new Date();
+      document.getElementById('tbody').innerHTML = trajets.map(t => {
+        const expired = t.expire_at && new Date(t.expire_at) <= now;
+        const expire = t.expire_at ? new Date(t.expire_at).toLocaleDateString('fr-FR') : '—';
+        return `<tr>
+          <td>${t.prenom} ${t.nom}</td>
+          <td>${t.adresse_depart}</td>
+          <td>${t.email}</td>
+          <td>${expire}</td>
+          <td><span class="badge ${expired ? 'expired' : 'active'}">${expired ? 'Expiré' : 'Actif'}</span></td>
+          <td><button class="btn-del" onclick="supprimer(${t.id})">🗑️ Supprimer</button></td>
+        </tr>`;
+      }).join('');
+    }
+
+    document.getElementById('search').addEventListener('input', e => {
+      const q = e.target.value.toLowerCase();
+      render(allTrajets.filter(t =>
+        (t.nom+t.prenom+t.email+t.adresse_depart).toLowerCase().includes(q)
+      ));
+    });
+
+    async function supprimer(id) {
+      if (!confirm('Supprimer ce trajet ?')) return;
+      await fetch(`/api/admin/trajets/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Basic ' + creds }
+      });
+      load();
+    }
+
+    load();
+  </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Covoiturage CESI La Rochelle</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <link rel="stylesheet" href="/styles/main.css"/>
+</head>
+<body>
+
+  <div id="map"></div>
+
+<div id="logo-cesi">
+  <img src="/cesi-logo.png" alt="CESI"/>
+</div>
+
+  <button id="btn-inscrire">+ Inscrire mon trajet</button>
+
+  <button id="btn-notice">ℹ Notice</button>
+
+  <div id="modal-notice" class="modal-fullscreen">
+    <div class="notice-content">
+      <h1>🚗 Covoiturage CESI La Rochelle</h1>
+      <ul>
+        <li>🚗 Bienvenue sur la plateforme de covoiturage réservée aux étudiants et au personnel du CESI de La Rochelle.</li>
+        <li>🤝 Partagez vos trajets et échangez dans un esprit convivial et respectueux.</li>
+        <li>🗺️ Consultez les parcours disponibles et cliquez sur un trajet pour faire une demande au covoitureur en quelques secondes.</li>
+        <li>🔒 Votre adresse n'est jamais diffusée ni associée publiquement à votre nom.</li>
+        <li>📩 Après une demande, le covoitureur choisit de l'accepter ou non : vos informations ne sont partagées qu'après validation de sa part.</li>
+        <li>⚠️ Merci de ne pas abuser des trajets proposés et de respecter les autres utilisateurs.</li>
+        <li>🌱 Ensemble, adoptons une solution de transport économique, écologique et humaine.</li>
+      </ul>
+      <button id="btn-ok-notice">J'ai compris ✓</button>
+    </div>
+  </div>
+
+  <div id="modal-inscrire" class="modal hidden">
+    <div class="modal-card">
+      <h2>🗺️ Inscrire mon trajet</h2>
+      <input id="i-nom" type="text" placeholder="Nom"/>
+      <input id="i-prenom" type="text" placeholder="Prénom"/>
+      <input id="i-email" type="email" placeholder="Email"/>
+      <div class="autocomplete-wrap">
+        <input id="i-adresse" type="text" placeholder="Adresse de départ" autocomplete="off"/>
+        <ul id="autocomplete-list"></ul>
+      </div>
+      <label>Date d'expiration du trajet</label>
+      <input id="i-expire" type="date"/>
+      <div class="modal-actions">
+        <button id="btn-submit-trajet">Valider</button>
+        <button class="btn-fermer">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-demande" class="modal hidden">
+    <div class="modal-card">
+      <h2>🚗 Demander un covoiturage</h2>
+      <p id="demande-info"></p>
+      <input id="d-nom" type="text" placeholder="Votre nom"/>
+      <input id="d-prenom" type="text" placeholder="Votre prénom"/>
+      <input id="d-email" type="email" placeholder="Votre email"/>
+      <div class="modal-actions">
+        <button id="btn-submit-demande">Envoyer la demande</button>
+        <button class="btn-fermer">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="copyright">© Maël Vidal Descos, Astral 8</div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
